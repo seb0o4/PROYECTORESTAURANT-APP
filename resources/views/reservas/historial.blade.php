@@ -2,199 +2,245 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de Reservas - Restaurante</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 25%, #81c784 50%, #a5d6a7 75%, #c8e6c9 100%);
-            background-attachment: fixed;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #3b2a1f;
         }
-        
-        .historial-card {
-            background-color: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            border: none;
+
+        /* VIDEO FONDO */
+        .video-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
         }
-        
-        .estado-pendiente {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 0.25rem 0.5rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
+
+        .video-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(.45);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: -1;
+        }
+
+        /* HEADER */
+        .header-center {
+            display: flex;
+            justify-content: center;
+            margin-top: 35px;
+        }
+
+        .header-glass {
+            width: 92%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(20,20,20,.65);
+            backdrop-filter: blur(18px);
+            padding: 18px 30px;
+            border-radius: 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,.6);
+        }
+
+        .header-left {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-right span {
+            color: #ddd;
             font-weight: 600;
         }
-        
-        .estado-confirmada {
-            background-color: #d1edff;
-            color: #0c5460;
-            padding: 0.25rem 0.5rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
+
+        .btn-header {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.2);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: .3s;
         }
-        
-        .estado-cancelada {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 0.25rem 0.5rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .reserva-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .reserva-card:hover {
+
+        .btn-header:hover {
+            background: rgba(255,255,255,.2);
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .btn-header.logout {
+            background: rgba(200,60,60,.7);
+        }
+
+        /* CONTENIDO */
+        .content-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 70px 15px 120px;
+        }
+
+        .historial-card {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(190,165,130,.88);
+            backdrop-filter: blur(14px);
+            border-radius: 30px;
+            box-shadow: 0 40px 80px rgba(0,0,0,.5);
+            overflow: hidden;
+        }
+
+        .historial-header {
+            background: rgba(130,95,65,.95);
+            color: #fff;
+            text-align: center;
+            padding: 35px;
+        }
+
+        .historial-body {
+            padding: 40px;
+            background: rgba(255,255,255,.95);
+        }
+
+        /* ESTADOS */
+        .estado {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: .8rem;
+            font-weight: 700;
+        }
+
+        .pendiente { background: #fff3cd; color: #856404; }
+        .confirmada { background: #d1edff; color: #0c5460; }
+        .cancelada { background: #f8d7da; color: #721c24; }
+
+        table th {
+            font-weight: 800;
         }
     </style>
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/dashboard">
-                <span style="font-size: 1.5rem;">🍽️</span> Restaurante App
-            </a>
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">Hola, {{ $user->name }}</span>
-                <a href="{{ route('reservas') }}" class="btn btn-outline-light btn-sm me-2">Nueva Reserva</a>
-                <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
-                </form>
-            </div>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="historial-card">
-                    <div class="card-header text-center" style="background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; border-radius: 20px 20px 0 0;">
-                        <h2>📊 Historial de Reservas</h2>
-                        <p class="mb-0">Todas tus reservas en un solo lugar</p>
-                    </div>
-                    <div class="card-body p-4">
-                        
-                        @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            ✅ {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        @endif
+<!-- VIDEO -->
+<div class="video-bg">
+    <video autoplay muted loop playsinline>
+        <source src="{{ asset('videos/videocosina.mp4') }}" type="video/mp4">
+    </video>
+</div>
 
-                        @if($reservas->count() > 0)
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Hora</th>
-                                            <th>Personas</th>
-                                            <th>Teléfono</th>
-                                            <th>Estado</th>
-                                            <th>Notas</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($reservas as $reserva)
-                                        <tr>
-                                            <td>{{ $reserva->fecha->format('d/m/Y') }}</td>
-                                            <td>{{ $reserva->hora }}</td>
-                                            <td>{{ $reserva->personas }} personas</td>
-                                            <td>{{ $reserva->telefono }}</td>
-                                            <td>
-                                                @if($reserva->estado == 'pendiente')
-                                                    <span class="estado-pendiente">⏳ Pendiente</span>
-                                                @elseif($reserva->estado == 'confirmada')
-                                                    <span class="estado-confirmada">✅ Confirmada</span>
-                                                @else
-                                                    <span class="estado-cancelada">❌ Cancelada</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($reserva->notas)
-                                                    <small class="text-muted">{{ Str::limit($reserva->notas, 30) }}</small>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary">Ver</button>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="text-center py-5">
-                                <div style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;">📅</div>
-                                <h4>No hay reservas en tu historial</h4>
-                                <p class="text-muted">Realiza tu primera reserva para comenzar.</p>
-                                <a href="{{ route('reservas') }}" class="btn btn-primary btn-lg">
-                                    📅 Hacer Mi Primera Reserva
-                                </a>
-                            </div>
-                        @endif
-
-                        <!-- Estadísticas -->
-                        @if($reservas->count() > 0)
-                        <div class="row mt-4">
-                            <div class="col-md-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="text-primary">{{ $reservas->where('estado', 'pendiente')->count() }}</h5>
-                                        <small>Pendientes</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="text-success">{{ $reservas->where('estado', 'confirmada')->count() }}</h5>
-                                        <small>Confirmadas</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="text-danger">{{ $reservas->where('estado', 'cancelada')->count() }}</h5>
-                                        <small>Canceladas</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="text-info">{{ $reservas->count() }}</h5>
-                                        <small>Total</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
+<!-- HEADER -->
+<div class="header-center">
+    <div class="header-glass">
+        <div class="header-left">📊 Historial de Reservas</div>
+        <div class="header-right">
+            <span>Hola, {{ $user->name }}</span>
+            <a href="{{ route('reservas') }}" class="btn-header">Nueva Reserva</a>
+            <a href="{{ route('dashboard') }}" class="btn-header">Dashboard</a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button class="btn-header logout">Salir</button>
+            </form>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- CONTENIDO -->
+<div class="content-wrapper">
+    <div class="historial-card">
+
+        <div class="historial-header">
+            <h2>📅 Tus Reservas</h2>
+            <p class="mb-0">Todas tus reservas en un solo lugar</p>
+        </div>
+
+        <div class="historial-body">
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    ✅ {{ session('success') }}
+                </div>
+            @endif
+
+            @if($reservas->count())
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Personas</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($reservas as $reserva)
+                        <tr>
+                            <td>{{ $reserva->fecha->format('d/m/Y') }}</td>
+                            <td>{{ $reserva->hora }}</td>
+                            <td>{{ $reserva->personas }}</td>
+                            <td>{{ $reserva->telefono }}</td>
+                            <td>
+                                @if($reserva->estado == 'pendiente')
+                                    <span class="estado pendiente">⏳ Pendiente</span>
+                                @elseif($reserva->estado == 'confirmada')
+                                    <span class="estado confirmada">✅ Confirmada</span>
+                                @else
+                                    <span class="estado cancelada">❌ Cancelada</span>
+                                @endif
+                            </td>
+                            <td>{{ $reserva->notas ?? '-' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- STATS -->
+            <div class="row mt-4 text-center">
+                <div class="col-md-3"><strong>{{ $reservas->where('estado','pendiente')->count() }}</strong><br><small>Pendientes</small></div>
+                <div class="col-md-3"><strong>{{ $reservas->where('estado','confirmada')->count() }}</strong><br><small>Confirmadas</small></div>
+                <div class="col-md-3"><strong>{{ $reservas->where('estado','cancelada')->count() }}</strong><br><small>Canceladas</small></div>
+                <div class="col-md-3"><strong>{{ $reservas->count() }}</strong><br><small>Total</small></div>
+            </div>
+
+            @else
+            <div class="text-center py-5">
+                <div style="font-size:4rem;">📅</div>
+                <h4>No tienes reservas aún</h4>
+                <p class="text-muted">Empieza haciendo tu primera reserva</p>
+                <a href="{{ route('reservas') }}" class="btn btn-dark btn-lg rounded-pill">
+                    📅 Reservar Ahora
+                </a>
+            </div>
+            @endif
+
+        </div>
+    </div>
+</div>
 </body>
 </html>

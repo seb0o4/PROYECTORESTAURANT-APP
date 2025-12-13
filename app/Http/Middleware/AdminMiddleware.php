@@ -1,12 +1,22 @@
-public function handle(Request $request, Closure $next)
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+
+class AdminMiddleware
 {
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
+    public function handle(Request $request, Closure $next)
+    {
+        if (!auth()->check()) {
+            return redirect('/login');
+        }
 
-    if (auth()->user()->role !== 'admin') {
-        return redirect()->route('dashboard')->with('error', 'No tienes permisos de administrador');
-    }
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Acceso solo para administradores');
+        }
 
-    return $next($request);
+        return $next($request);
+    }
 }
